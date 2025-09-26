@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <array>
 #include <cstdint>
+#include <array>
 
 using s08 = std::int8_t;
 using s16 = std::int16_t;

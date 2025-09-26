@@ -11,7 +11,9 @@
 #include <vector>
 #include "endian.h"
 #include "crypto/crypto.h"
-#include "pfs.h"
+#include "common/pfs.h"
+#include "common/types.h"
+#include "common/endian.h"
 
 struct PKGHeader {
     u32_be magic; // Magic

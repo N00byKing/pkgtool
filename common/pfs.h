@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <string>
 
-#include "types.h"
+#include "common/types.h"
 
 #define PFS_FILE 2
 #define PFS_DIR 3

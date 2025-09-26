@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "log.h"
+#include "common/log.h"
 
 // Sometimes we want to try to continue even after hitting an assert.
 // However touching this file yields a global recompilation as this header is included almost

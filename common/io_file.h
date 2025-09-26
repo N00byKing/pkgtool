@@ -8,9 +8,9 @@
 #include <span>
 #include <type_traits>
 
-#include "concepts.h"
-#include "types.h"
-#include "enum.h"
+#include "common/concepts.h"
+#include "common/types.h"
+#include "common/enum.h"
 
 namespace Common::FS {
 

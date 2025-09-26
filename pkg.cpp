@@ -83,6 +83,7 @@ bool PKG::Extract(const std::string& filepath, const std::filesystem::path& extr
     pkgpath = filepath;
     Common::FS::IOFile file(filepath, Common::FS::FileAccessMode::Read);
     if (!file.IsOpen()) {
+        failreason = "File not found!\n";
         return false;
     }
     pkgSize = file.GetSize();

@@ -4,16 +4,13 @@
 #pragma once
 
 #include <array>
-#include <cstdio>
 #include <filesystem>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "endian.h"
+#include "common/endian.h"
 #include "crypto/crypto.h"
 #include "common/pfs.h"
-#include "common/types.h"
-#include "common/endian.h"
 
 struct PKGHeader {
     u32_be magic; // Magic
@@ -75,6 +72,19 @@ struct PKGHeader {
     u8 pkg_digest[0x20];
 };
 
+enum class PKGContentFlag {
+    FIRST_PATCH = 0x100000,
+    PATCHGO = 0x200000,
+    REMASTER = 0x400000,
+    PS_CLOUD = 0x800000,
+    GD_AC = 0x2000000,
+    NON_GAME = 0x4000000,
+    UNKNOWN_0x8000000 = 0x8000000,
+    SUBSEQUENT_PATCH = 0x40000000,
+    DELTA_PATCH = 0x41000000,
+    CUMULATIVE_PATCH = 0x60000000
+};
+
 struct PKGEntry {
     u32_be id;              // File ID, useful for files without a filename entry
     u32_be filename_offset; // Offset into the filenames table (ID 0x200) where this file's name is
@@ -92,10 +102,12 @@ public:
     PKG();
     ~PKG();
 
-    bool Open(const std::string& filepath);
-    void ExtractFiles(const int& index);
-    bool Extract(const std::string& filepath, const std::filesystem::path& extract,
+    bool Open(const std::filesystem::path& filepath, std::string& failreason);
+    void ExtractFiles(const int index);
+    bool Extract(const std::filesystem::path& filepath, const std::filesystem::path& extract,
                  std::string& failreason);
+
+    std::vector<u8> sfo;
 
     u32 GetNumberOfFiles() {
         return fsTable.size();
@@ -105,35 +117,56 @@ public:
         return pkgSize;
     }
 
+    std::string GetPkgFlags() {
+        return pkgFlags;
+    }
+
     std::string_view GetTitleID() {
         return std::string_view(pkgTitleID, 9);
     }
 
+    PKGHeader GetPkgHeader() {
+        return pkgheader;
+    }
+
+    static bool isFlagSet(u32_be variable, PKGContentFlag flag) {
+        return (variable) & static_cast<u32>(flag);
+    }
+
+    static constexpr std::array<std::pair<PKGContentFlag, std::string_view>, 10> flagNames = {
+        {{PKGContentFlag::FIRST_PATCH, "FIRST_PATCH"},
+         {PKGContentFlag::PATCHGO, "PATCHGO"},
+         {PKGContentFlag::REMASTER, "REMASTER"},
+         {PKGContentFlag::PS_CLOUD, "PS_CLOUD"},
+         {PKGContentFlag::GD_AC, "GD_AC"},
+         {PKGContentFlag::NON_GAME, "NON_GAME"},
+         {PKGContentFlag::UNKNOWN_0x8000000, "UNKNOWN_0x8000000"},
+         {PKGContentFlag::SUBSEQUENT_PATCH, "SUBSEQUENT_PATCH"},
+         {PKGContentFlag::DELTA_PATCH, "DELTA_PATCH"},
+         {PKGContentFlag::CUMULATIVE_PATCH, "CUMULATIVE_PATCH"}}};
+
 private:
     Crypto crypto;
-    std::vector<u8> pkg;
     u64 pkgSize = 0;
     char pkgTitleID[9];
     PKGHeader pkgheader;
+    std::string pkgFlags;
 
-    std::unordered_map<int, std::string> folderMap;
-    std::unordered_map<int, std::string> extractMap;
+    std::unordered_map<int, std::filesystem::path> extractPaths;
     std::vector<pfs_fs_table> fsTable;
     std::vector<Inode> iNodeBuf;
     std::vector<u64> sectorMap;
     u64 pfsc_offset;
 
-    std::array<CryptoPP::byte, 32> dk3_;
-    std::array<CryptoPP::byte, 32> ivKey;
-    std::array<CryptoPP::byte, 256> imgKey;
-    std::array<CryptoPP::byte, 32> ekpfsKey;
-    std::array<CryptoPP::byte, 16> dataKey;
-    std::array<CryptoPP::byte, 16> tweakKey;
+    std::array<u8, 32> dk3_;
+    std::array<u8, 32> ivKey;
+    std::array<u8, 256> imgKey;
+    std::array<u8, 32> ekpfsKey;
+    std::array<u8, 16> dataKey;
+    std::array<u8, 16> tweakKey;
+    std::vector<u8> decNp;
 
     std::filesystem::path pkgpath;
     std::filesystem::path current_dir;
-    std::filesystem::path parent_dir;
     std::filesystem::path extract_path;
-    std::filesystem::path game_dir;
-    std::filesystem::path title_dir;
 };

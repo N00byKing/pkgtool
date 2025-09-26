@@ -11,7 +11,6 @@
 // everywhere. So let's just move the handling of the failed assert to a single cpp file.
 
 void assert_fail_impl();
-[[noreturn]] void unreachable_impl();
 
 #ifdef _MSC_VER
 #define SHAD_NO_INLINE __declspec(noinline)
@@ -23,7 +22,7 @@ void assert_fail_impl();
     ([&]() SHAD_NO_INLINE {                                                                        \
         if (!(_a_)) [[unlikely]] {                                                                 \
             LOG_CRITICAL(Debug, "Assertion Failed!");                                              \
-            assert_fail_impl();                                                                    \
+            exit(1);                                                                    \
         }                                                                                          \
     }())
 
@@ -31,20 +30,20 @@ void assert_fail_impl();
     ([&]() SHAD_NO_INLINE {                                                                        \
         if (!(_a_)) [[unlikely]] {                                                                 \
             LOG_CRITICAL(Debug, "Assertion Failed!\n" __VA_ARGS__);                                \
-            assert_fail_impl();                                                                    \
+            exit(1);                                                                    \
         }                                                                                          \
     }())
 
 #define UNREACHABLE()                                                                              \
     do {                                                                                           \
         LOG_CRITICAL(Debug, "Unreachable code!");                                                  \
-        unreachable_impl();                                                                        \
+        __builtin_unreachable();                                                                        \
     } while (0)
 
 #define UNREACHABLE_MSG(...)                                                                       \
     do {                                                                                           \
         LOG_CRITICAL(Debug, "Unreachable code!\n" __VA_ARGS__);                                    \
-        unreachable_impl();                                                                        \
+        __builtin_unreachable();                                                                        \
     } while (0)
 
 #ifdef _DEBUG

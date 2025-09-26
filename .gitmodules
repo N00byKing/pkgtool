@@ -1,0 +1,6 @@
+[submodule "cryptopp"]
+	path = cryptopp
+	url = https://github.com/shadps4-emu/ext-cryptopp/
+[submodule "ext-cryptopp-cmake"]
+	path = ext-cryptopp-cmake
+	url = https://github.com/shadps4-emu/ext-cryptopp-cmake

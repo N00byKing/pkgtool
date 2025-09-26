@@ -5,6 +5,7 @@ project(pkgtool CXX C)
 set(CMAKE_CXX_STANDARD 23)
 
 add_executable(pkgtool
+    main.cpp
     pkg_type.cpp
     pkg.cpp
     common/io_file.cpp

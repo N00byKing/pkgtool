@@ -1,5 +1,6 @@
 #include "pkg.h"
 #include <iostream>
+#include <omp.h>
 
 int main(int argc, char** argv) {
     if (argc < 3) {
@@ -24,9 +25,24 @@ int main(int argc, char** argv) {
 
     std::cout << "Title ID: " << p.GetTitleID() << "\n";
     std::cout << "Number of files: " << p.GetNumberOfFiles() << "\n";
-    for (int i = 0; i < nfiles; i++) {
-        p.ExtractFiles(i);
-        std::cout << "Extracted file " << i+1 << "/" << nfiles << "\n";
+
+    #ifdef _OPENMP
+        omp_set_num_threads(std::min(4, omp_get_max_threads()));
+    #else
+        std::cout << "No OpenMP support configured, running single-threaded\n";
+    #endif
+    #pragma omp parallel
+    {
+        #ifdef _OPENMP
+            int thrid = omp_get_thread_num();
+            int num_thr = omp_get_num_threads();
+            std::cout << "Thread: " << thrid+1 << "/" << num_thr << " active\n";
+        #endif
+        #pragma omp for
+        for (int i = 0; i < nfiles; i++) {
+            p.ExtractFiles(i);
+            std::cout << "Extracted file " << i+1 << "/" << nfiles << "\n";
+        }
     }
 
     if (!reason.empty())

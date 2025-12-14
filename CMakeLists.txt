@@ -13,6 +13,11 @@ add_executable(pkgtool
     crypto/crypto.cpp
 )
 
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(pkgtool PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
 # CryptoPP
 set(CRYPTOPP_INSTALL OFF)
 set(CRYPTOPP_BUILD_TESTING OFF)
@@ -31,6 +36,6 @@ find_package(zlib-ng REQUIRED)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(pkgtool cryptopp::cryptopp zlib-ng::zlib)
+target_link_libraries(pkgtool PUBLIC cryptopp::cryptopp zlib-ng::zlib)
 
 install(TARGETS pkgtool)

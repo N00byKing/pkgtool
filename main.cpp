@@ -21,8 +21,13 @@ int main(int argc, char** argv) {
     bool result = p.Extract(src, dest_title, reason);
 
     int nfiles = p.GetNumberOfFiles();
-    for (int i = 0; i < nfiles; i++)
+
+    std::cout << "Title ID: " << p.GetTitleID() << "\n";
+    std::cout << "Number of files: " << p.GetNumberOfFiles() << "\n";
+    for (int i = 0; i < nfiles; i++) {
         p.ExtractFiles(i);
+        std::cout << "Extracted file " << i+1 << "/" << nfiles << "\n";
+    }
 
     if (!reason.empty())
         std::cout << reason << "\n";

@@ -31,17 +31,25 @@ int main(int argc, char** argv) {
     #else
         std::cout << "No OpenMP support configured, running single-threaded\n";
     #endif
-    #pragma omp parallel
+    int files_processed = 0;
+    #pragma omp parallel shared(files_processed)
     {
         #ifdef _OPENMP
             int thrid = omp_get_thread_num();
             int num_thr = omp_get_num_threads();
-            std::cout << "Thread: " << thrid+1 << "/" << num_thr << " active\n";
+            #pragma omp critical
+            {
+                std::cout << "Thread: " << thrid+1 << "/" << num_thr << " active\n";
+            }
+            #pragma omp barrier
         #endif
-        #pragma omp for
+        #pragma omp for schedule(dynamic)
         for (int i = 0; i < nfiles; i++) {
             p.ExtractFiles(i);
-            std::cout << "Extracted file " << i+1 << "/" << nfiles << "\n";
+            std::cout << "Extracted file with index " << i+1 << "\n";
+            #pragma omp atomic
+                files_processed += 1;
+            std::cout << "Total files done: " << files_processed << "/" << nfiles << "\n";
         }
     }
 
